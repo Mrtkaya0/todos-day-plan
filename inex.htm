@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TO-DO App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .container{
+            width: 80%;
+            margin: 2rem auto;
+            padding: 1rem;
+            max-width: 800px;
+            box-shadow: rgba(0, 1, 9, 0.3) 0px 50px 100px -20px, rgba(72, 248, 3, 0.267) 0px 30px 60px -30px, rgba(0, 245, 41, 0.808) 0px -2px 6px 0px inset;
+
+        }
+        .container:hover{
+            box-shadow: rgba(0, 1, 9, 0.3) 0px 50px 100px -20px, rgba(72, 248, 3, 0.267) 0px 30px 60px -30px, rgba(12, 12, 12, 0.808) 0px -2px 6px 0px inset;
+        }
+
+
+        #todos{
+            width: 90%;
+            margin: 2rem auto;
+            padding: 1rem;
+
+        }
+
+        h1{
+            margin: 0;
+            text-align: center;
+            text-transform: uppercase;    
+
+        }
+
+        input[type='text']{
+            padding: .5rem;
+            font-size: 1.2rem;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+            
+        }
+        button:hover{
+            background-color: red;
+            color: white;
+            border: none;
+            transition: 0.5s;
+        }
+
+        
+
+        button{
+            padding: .5rem 1rem;
+            margin-left: 20px;
+            font-size: 1.2rem;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+        }
+        #todos > div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            box-shadow: rgba(0, 0, 0, 0.521) 2px 1px 18px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 2rem;
+        }
+        .input-button-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-button-container input {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 25px;
+
+        }
+        .input-button-container button{
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            font-size: 36px;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        .input-button-container button:hover{
+            background-color: #ff0303af; /* Hover durumunda arka plan rengini değiştirir */
+            box-shadow: 0px 6px 8px rgba(255, 1, 1, 0.603); 
+            color: white;
+            border-radius: 50%;
+            transition: all .5;
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Todos</h1>
+        <form id="frmTodos">
+            <input id="title" type="text" placeholder="what are you going to todo" required>
+            <button><i class="fa-solid fa-plus"></i></button>
+        </form>
+        
+    </div>
+    <div id="todos"></div>
+
+
+    <script>
+
+        const divTodos = document.getElementById('todos');
+        const frmTodos = document.getElementById('frmTodos');
+        const txtTitle = document.getElementById('title');
+
+        let todos =[
+            {
+                title: 'Do your homework',
+                done: false
+            },
+            {
+                title: 'Do shopping',
+                done: true
+            },
+            {
+                title: 'Take a walk',
+                done: false
+            },
+            {
+                title: 'Watch Netflix',
+                done: false
+            },
+        ]
+
+        function listTodos(){
+            todos.sort ((a, b) => a.done - b.done);
+            saveData();
+
+            divTodos.innerHTML = '';
+            for (const todo of todos) {
+                let div = document.createElement('div');
+            
+                // inputtan gelen metni yazadığın alanı oluştur
+                let span = document.createElement('span');
+                span.textContent = todo.title;
+                div.append(span);
+
+
+                let inputButtonContainer = document.createElement('div');
+                inputButtonContainer.className = 'input-button-container'
+
+                 // tiklenme sekmesini oluştur
+                let input = document.createElement('input');
+                input.setAttribute('type', 'checkbox');
+                input.checked = todo.done;
+                input.onchange = (e) => toggleTodo(todo)
+                inputButtonContainer.append(input);
+                
+
+                // kaldırma silme butonu oluştur
+                let button = document.createElement('button');
+                button.setAttribute('type', 'button');
+                // silme kısmı için bir tıklama evendi oluşturduk
+                button.onclick = (e) => deleteTodo(todo);
+                button.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                inputButtonContainer.append(button);
+
+                div.append(inputButtonContainer);
+
+                divTodos.append(div);
+            }
+        }
+
+        function saveData (){
+            localStorage['data'] = JSON.stringify(todos);
+        }
+
+        function loadData() {
+            let json = localStorage['data'];
+            if (!json) return;
+            try{
+                todos = JSON.parse(json);
+
+            }
+            catch{}
+        }
+
+        // eklenen sıralamıyı  güncellendikçe düzeltme
+        function toggleTodo(todo){
+            todo.done = !todo.done;
+            listTodos()
+        }
+
+        // oluşturdğumuz tıklama eventini bir fonksiyonda çağırıp tıkladığımız indexin todos yakalayığ splice ile listTodos sildik
+        function deleteTodo (todo){
+            let i = todos.indexOf(todo);
+            todos.splice(i,1);
+            listTodos()
+        }
+
+        // ekleme kısmı
+
+        frmTodos.onsubmit = function(event){
+            event.preventDefault();
+            todos.push({
+                title:txtTitle.value.trim(),
+                done: false
+            });
+            listTodos();
+            txtTitle.value = '';
+
+        }
+
+        loadData();
+        listTodos();
+    </script>
+    
+</body>
+</html>
